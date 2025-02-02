@@ -5,7 +5,7 @@ const fetchData = async () => {
     const { data } = await axios.get("https://jsonplaceholder.typicode.com/posts");
     return data;
 };
-
+//usequery 기본 구조
 const MyComponent = () => {
     const { data, isLoading, error } = useQuery({
         queryKey: ["posts"],
@@ -61,3 +61,40 @@ useEffect(()=>{
     };
     fetchData;
 },[])
+
+//내부적으로 usequery가 하는 동작을 코드로 표현
+const useQuery = ({queryKey, queryFn, Options}) => {
+    const [state, setState] = useState({
+        data : null,
+        error : null,
+        isLoading : true,
+    });
+
+    useEffect(()=>{
+        let isMounted = true;
+
+        const fetchData = async () => {
+            try {
+                const cachedData = queryClient.getCache(queryKey); // 캐싱된 데이터가 있는지 확인
+                if(cachedData){ //데이터가 있으면
+                    setState({data: cachedData, error: null, isLoading:false});
+                }else {
+                    const data = await queryFn(); //데이터 없으면
+                    queryClient.setCache(queryKey, data);
+                    if(isMounted){
+                        setState({data, error : null, isLoading:false})
+                    }
+                }
+            }catch (error) {
+                if(isMounted){
+                    setState({data:null, error , isLoading : false})
+                }
+            }
+        };
+        fetchData();
+        return () => {
+            isMounted = false; //언마운트 된 경우 상태 업데이트 방지
+        };
+    }, [queryKey,queryFn]);
+    return state;
+}
