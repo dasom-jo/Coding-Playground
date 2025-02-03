@@ -59,3 +59,65 @@ export const UserProfile2 = () => {
     const {id} = router.query;
     return <h1>사용자 id : {id}</h1>
 }
+
+//React Router 내부적으로 동작하는 코드
+window.addEventListener("popstate", ()=>{
+    console.log ('url이 변경되었습니다.', window.location.pathname);
+    renderComponentForRoute(window.location.pathname);
+});
+
+//hashrouter
+window.addEventListener("hashchange", ()=>{
+    console.log('해시변경감지', window.location.hash);
+    renderComponentForRoute(window.location.hash)
+})
+
+//Routing 기본 원리
+const routes =[
+    {path:'/', component: Home},
+    {path:'/about', component: About},
+]
+
+const renderComponentForRoute = (path) => {
+    const match = routes.find((route) => route.path === path);
+    if (math) {
+        render(math.component);
+    }else{
+        render(NotFound)
+    }
+};
+
+//routes와 route의 내부 동작
+<Routes>
+    <Route path='/' element={<Home/>}/>
+    <Route path='/about' element={<About/>}/>
+</Routes>
+const match = routes.find((route)=> route.path === window.location.pathname);
+if(match){
+    render(match.element);
+}else {
+    render(NotFound);
+}
+
+//동적 라우팅의 원리
+<Route path="/user/:id" element={<UserProfile />} />
+const pathPattern = "/user/:id";
+const url = "/user/123";
+const match2 = url.match(/\/user\/(\d+)/); //정규식을 이용하여 id 추출
+if(match2) {
+    console.log("유저id:" , match2[1]) //123
+}
+
+//라우팅이 변경 될 때 상태 초기화 하는 방법
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+const MyComponent = () => {
+    const location = useLocation();
+
+    useEffect(()=>{
+        console.log('라우팅 변경 감지:', location.pathname);
+        //상태 초기화
+    },[location]);
+    return <div>현재 페이지:{location.pathname}</div>
+}
