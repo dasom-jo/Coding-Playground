@@ -1,19 +1,28 @@
-import { useState, useTransition } from 'react';
+import React, { useState, useTransition } from 'react';
 //useTransition : 비동기 처리에 우선 순위 주기
 function MyComponent () {
+    const [fast, setFast] = useState("");
+    const [slow, setSlow] = useState("");
     const [isPending, startTransition] = useTransition();
-    const [data, setData] = useState(null);
 
-    const handleClick = () => {
-        startTransition(async() => {
-            const result = await fetchData();
-            setData(result);
-        })
+    const update = () => {
+        setFast("긴급");
+
+        startTransition(async()=>{
+            const error = await fetchApi()
+            if(error) {
+
+            }else{
+                setSlow('여유')
+            }
+        });
     };
+
     return(
         <div>
-            <button onClick={handleClick}>데이터 가져오기</button>
-            {isPending ? <p>로딩중....</p>:<p>{data}</p>}
+            <h1>{fast}</h1>
+            <button onClick={update}>데이터 가져오기</button>
+            {isPending ? <p>로딩중....</p>:<p>{slow}</p>}
         </div>
     )
 }
@@ -39,3 +48,4 @@ const Transition = () => {
         </div>
     )
 }
+
